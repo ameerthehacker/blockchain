@@ -2,20 +2,11 @@ const Block = require("../src/block");
 const BlockChain = require("../src/block-chain");
 
 describe("BlockChain", () => {
-  let bc1, bc2, genesisBlock;
+  let bc1, bc2;
 
   beforeEach(() => {
-    genesisBlock = Block.genesis();
-    // Mocking the genesis function
-    Block.genesis = () => {
-      return genesisBlock;
-    };
     bc1 = new BlockChain();
     bc2 = new BlockChain();
-  });
-
-  it("should start with the genesis block", () => {
-    expect(bc1.chain[0]).toEqual(genesisBlock);
   });
 
   it("should add data to the block chain", () => {
@@ -26,7 +17,7 @@ describe("BlockChain", () => {
   });
 
   it("should return true for `valid` blockchain", () => {
-    expect(bc2.isValid(bc1.chain)).toBeTruthy();
+    expect(bc1.isValid(bc2.chain)).toBeTruthy();
   });
 
   it("should return false if the `genesis` block is tampered", () => {
@@ -47,5 +38,20 @@ describe("BlockChain", () => {
     bc2.chain[1].hash = "bar";
 
     expect(bc1.isValid(bc2.chain)).toBeFalsy();
+  });
+
+  it("should reject the new chain if newchain length is <= current chain length", () => {
+    bc1.replaceChain(bc2.chain);
+    expect(bc1.chain).toEqual(bc1.chain);
+
+    bc1.addBlock("foo");
+    bc1.replaceChain(bc2.chain);
+    expect(bc1.chain).toEqual(bc1.chain);
+  });
+
+  it("should accept the new chain if newchain length is > current chain length", () => {
+    bc2.addBlock("bar");
+    bc1.replaceChain(bc2.chain);
+    expect(bc1.chain).toEqual(bc2.chain);
   });
 });

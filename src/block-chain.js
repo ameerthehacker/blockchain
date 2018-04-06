@@ -32,6 +32,20 @@ class BlockChain {
 
     return true;
   }
+
+  replaceChain(newChain) {
+    if (newChain.length <= this.chain.length) {
+      console.log("Recieved chain is not longer than the current chain");
+      return false;
+    } else if (!this.isValid(newChain)) {
+      console.log("Recieved chain is invalid!");
+      return false;
+    }
+    console.log("Accepting the new chain");
+    this.chain = newChain;
+
+    return true;
+  }
 }
 
 module.exports = BlockChain;
