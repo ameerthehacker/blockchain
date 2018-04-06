@@ -1,7 +1,7 @@
 {
   "name": "blockchain",
   "version": "1.0.0",
-  "description": "My own blockchain for scratch for udemy course",
+  "description": "My own blockchain from scratch for udemy course",
   "main": "main.js",
   "scripts": {
     "test": "jest --watchAll"
