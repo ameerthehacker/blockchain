@@ -2,16 +2,50 @@ const Block = require("../src/block");
 const BlockChain = require("../src/block-chain");
 
 describe("BlockChain", () => {
-  let bc;
+  let bc1, bc2, genesisBlock;
 
   beforeEach(() => {
-    bc = new BlockChain();
+    genesisBlock = Block.genesis();
+    // Mocking the genesis function
+    Block.genesis = () => {
+      return genesisBlock;
+    };
+    bc1 = new BlockChain();
+    bc2 = new BlockChain();
+  });
+
+  it("should start with the genesis block", () => {
+    expect(bc1.chain[0]).toEqual(genesisBlock);
   });
 
   it("should add data to the block chain", () => {
     const data = "foo";
-    bc.addBlock(data);
+    bc1.addBlock(data);
 
-    expect(bc.chain[bc.chain.length - 1].data).toBe(data);
+    expect(bc1.chain[bc1.chain.length - 1].data).toBe(data);
+  });
+
+  it("should return true for `valid` blockchain", () => {
+    expect(bc2.isValid(bc1.chain)).toBeTruthy();
+  });
+
+  it("should return false if the `genesis` block is tampered", () => {
+    bc2.chain[0].data = "bar";
+
+    expect(bc1.isValid(bc2.chain)).toBeFalsy();
+  });
+
+  it("should return false if the `lastHash` in a block is invalid", () => {
+    bc2.addBlock("foo");
+    bc2.chain[1].lastHash = "bar";
+
+    expect(bc1.isValid(bc2.chain)).toBeFalsy();
+  });
+
+  it("should return false if the `hash` in a block is invalid", () => {
+    bc2.addBlock("foo");
+    bc2.chain[1].hash = "bar";
+
+    expect(bc1.isValid(bc2.chain)).toBeFalsy();
   });
 });

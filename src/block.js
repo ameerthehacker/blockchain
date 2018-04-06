@@ -46,6 +46,7 @@ class Block {
    * @param {Block} lastBlock Last block in the blockchain
    * @param {Object} data Actual data to be stored in the new block
    */
+
   static mineBlock(lastBlock, data) {
     const timestamp = Date.now();
     const lastHash = lastBlock.hash;
@@ -62,6 +63,16 @@ class Block {
    */
   static hash(timestamp, lastHash, data) {
     return SHA256(`${timestamp}${lastHash}${data}`).toString();
+  }
+
+  /**
+   * Return the result of hashing the block
+   * @param {Block} block The block for which hash is to be calculated
+   */
+  static hashBlock(block) {
+    const { timestamp, lastHash, data } = block;
+
+    return this.hash(timestamp, lastHash, data);
   }
 }
 
