@@ -1,5 +1,5 @@
 const SHA256 = require("crypto-js/sha256");
-const { DIFFICULTY } = require("../../config");
+const { DIFFICULTY, MINE_RATE } = require("../../config");
 
 /**
  * Representation of Block in the blockchain
@@ -13,12 +13,13 @@ class Block {
    * @param { Number } nonce Unique number to perform proof of work
    * @param {Object|String|Array|Number} data Actual data that is stored in the block
    */
-  constructor(timestamp, hash, lastHash, nonce, data) {
+  constructor(timestamp, hash, lastHash, nonce, data, difficulty = DIFFICULTY) {
     this.timestamp = timestamp;
     this.hash = hash;
     this.lastHash = lastHash;
     this.nonce = nonce;
     this.data = data;
+    this.difficulty = difficulty;
   }
 
   /**
@@ -40,7 +41,7 @@ class Block {
     const timestamp = Date.now();
     const lastHash = "-";
     const data = [];
-    const hash = this.hash(timestamp, lastHash, 0, []);
+    const hash = this.hash(timestamp, lastHash, 0, [], DIFFICULTY);
 
     return new this(timestamp, hash, lastHash, 0, []);
   }
@@ -56,13 +57,16 @@ class Block {
       nonce = 0,
       hash;
     const lastHash = lastBlock.hash;
+    let difficulty = lastBlock.difficulty;
 
     do {
       nonce++;
-      hash = this.hash(timestamp, lastHash, nonce, data);
-    } while (hash.substr(0, DIFFICULTY) !== "0".repeat(DIFFICULTY));
+      timestamp = Date.now();
+      difficulty = this.adjustDifficulty(lastBlock, timestamp);
+      hash = this.hash(timestamp, lastHash, nonce, data, difficulty);
+    } while (hash.substr(0, difficulty) !== "0".repeat(difficulty));
 
-    return new this(timestamp, hash, lastHash, nonce, data);
+    return new this(timestamp, hash, lastHash, nonce, data, difficulty);
   }
 
   /**
@@ -72,8 +76,10 @@ class Block {
    * @param { Number } nonce Unique number to perform proof of work
    * @param {Object} data Actual data to be stored in the block
    */
-  static hash(timestamp, lastHash, nonce, data) {
-    return SHA256(`${timestamp}${lastHash}${nonce}${data}`).toString();
+  static hash(timestamp, lastHash, nonce, data, difficulty) {
+    return SHA256(
+      `${timestamp}${lastHash}${nonce}${data}${difficulty}`
+    ).toString();
   }
 
   /**
@@ -81,9 +87,20 @@ class Block {
    * @param {Block} block The block for which hash is to be calculated
    */
   static hashBlock(block) {
-    const { timestamp, lastHash, nonce, data } = block;
+    const { timestamp, lastHash, nonce, data, difficulty } = block;
 
-    return this.hash(timestamp, lastHash, nonce, data);
+    return this.hash(timestamp, lastHash, nonce, data, difficulty);
+  }
+
+  /**
+   *
+   * @param {Block} lastBlock Last block in the blockchain
+   * @param {String} currentTime Timestamp at which the block was created
+   */
+  static adjustDifficulty(lastBlock, currentTime) {
+    return lastBlock.timestamp + MINE_RATE > currentTime
+      ? lastBlock.difficulty + 1
+      : lastBlock.difficulty - 1;
   }
 }
 

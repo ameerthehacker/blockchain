@@ -20,16 +20,29 @@ describe("Block", () => {
   });
 
   it("should calculate the `hash` correctly", () => {
-    const timestamp = block.timestamp;
-    const lastHash = block.lastHash;
-    const nonce = block.nonce;
-    const data = block.data;
-    const hash = SHA256(`${timestamp}${lastHash}${nonce}${data}`).toString();
+    const { timestamp, lastHash, nonce, data, difficulty } = block;
+    const hash = SHA256(
+      `${timestamp}${lastHash}${nonce}${data}${difficulty}`
+    ).toString();
 
     expect(block.hash).toBe(hash);
   });
 
   it("should do the proof of work correctly", () => {
-    expect(block.hash.substr(0, DIFFICULTY)).toBe("0".repeat(DIFFICULTY));
+    expect(block.hash.substr(0, block.difficulty)).toBe(
+      "0".repeat(block.difficulty)
+    );
+  });
+
+  it("should decrease the difficulty for slowly mined blocks", () => {
+    expect(Block.adjustDifficulty(block, block.timestamp + 36000)).toBe(
+      block.difficulty - 1
+    );
+  });
+
+  it("should raise the difficulty for slowly mined blocks", () => {
+    expect(Block.adjustDifficulty(block, block.timestamp + 1)).toBe(
+      block.difficulty + 1
+    );
   });
 });
