@@ -1,5 +1,5 @@
-const SHA256 = require("crypto-js/sha256");
 const { DIFFICULTY, MINE_RATE } = require("../../config");
+const Util = require("../util");
 
 /**
  * Representation of Block in the blockchain
@@ -78,7 +78,7 @@ class Block {
    * @param {Object} data Actual data to be stored in the block
    */
   static hash(timestamp, lastHash, nonce, data, difficulty) {
-    return SHA256(
+    return Util.hash(
       `${timestamp}${lastHash}${nonce}${data}${difficulty}`
     ).toString();
   }
