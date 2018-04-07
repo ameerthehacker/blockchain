@@ -27,11 +27,12 @@ class Block {
    */
   toString() {
     return `Block ->
-            Timestamp: ${this.timestamp}
-            Hash     : ${this.hash.substr(0, 10)}
-            Last Hash: ${this.lastHash.substr(0, 10)}
-            Nonce    : ${this.nonce}
-            Data     : ${this.data}`;
+            Timestamp : ${this.timestamp}
+            Hash      : ${this.hash.substr(0, 10)}
+            Last Hash : ${this.lastHash.substr(0, 10)}
+            Nonce     : ${this.nonce}
+            Data      : ${this.data}
+            Difficulty: ${this.difficulty}`;
   }
 
   /**
