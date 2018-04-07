@@ -2,8 +2,8 @@ const WebSocket = require("ws");
 const PEERS = process.env.PEERS ? process.env.PEERS.split(",") : [];
 
 class P2Pserver {
-  constructor(server, blockchain) {
-    this.blockchain = blockchain;
+  constructor(server, bc) {
+    this.bc = bc;
     this.sockets = [];
     this.server = server;
   }
@@ -36,6 +36,23 @@ class P2Pserver {
 
   connectSocket(socket) {
     this.sockets.push(socket);
+    this.messageHandler(socket);
+    this.sendChain(socket);
+  }
+
+  sendChain(socket) {
+    socket.send(JSON.stringify(this.bc.chain));
+  }
+
+  syncChain(chain) {
+    this.sockets.forEach(socket => this.sendChain(socket));
+  }
+
+  messageHandler(socket) {
+    socket.on("message", message => {
+      const chain = JSON.parse(message);
+      this.bc.replaceChain(chain);
+    });
   }
 }
 
