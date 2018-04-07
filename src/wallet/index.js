@@ -19,6 +19,14 @@ class Wallet {
             Balance   : ${this.balance}
             Public Key: ${this.publicKey.toString()}`;
   }
+
+  /**
+   * Signs hashed data with the wallet's keypair
+   * @param {String} hash Hashed data that is to be signed
+   */
+  sign(hash) {
+    return this.keyPair.sign(hash);
+  }
 }
 
 module.exports = Wallet;

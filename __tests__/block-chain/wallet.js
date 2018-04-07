@@ -50,5 +50,35 @@ describe("Wallet", () => {
 
       expect(transaction).toBeUndefined();
     });
+
+    it("should return true for valid transactions", () => {
+      const amount = 50;
+      const transaction = Transaction.createTransaction(
+        senderWallet,
+        recipientWallet.publicKey,
+        amount
+      );
+      Transaction.signTransaction(transaction, senderWallet);
+
+      expect(
+        Transaction.verifyTransaction(transaction, senderWallet)
+      ).toBeTruthy();
+    });
+
+    it("should return false for invalid transactions", () => {
+      const amount = 50;
+      const transaction = Transaction.createTransaction(
+        senderWallet,
+        recipientWallet.publicKey,
+        amount
+      );
+      Transaction.signTransaction(transaction, senderWallet);
+      // Tamper with the amount
+      transaction.outputs[0].amount += 100;
+
+      expect(
+        Transaction.verifyTransaction(transaction, senderWallet)
+      ).toBeFalsy();
+    });
   });
 });

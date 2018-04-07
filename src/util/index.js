@@ -23,7 +23,11 @@ class Util {
    * @param {Object} data The data to be hashed
    */
   static hash(data) {
-    return SHA256(data);
+    return SHA256(JSON.stringify(data)).toString();
+  }
+
+  static verifySignature(publicKey, signature, hash) {
+    return ec.keyFromPublic(publicKey, "hex").verify(hash, signature);
   }
 }
 
