@@ -21,6 +21,4 @@ class Wallet {
   }
 }
 
-console.log(new Wallet().toString());
-
 module.exports = Wallet;
