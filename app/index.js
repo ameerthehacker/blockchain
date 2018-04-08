@@ -5,7 +5,11 @@ const http = require("http");
 const HTTP_PORT = process.env.HTTP_PORT || 3000;
 const BlockChain = require("../src/block-chain");
 const P2Pserver = require("./p2p-server");
+const Wallet = require("../src/wallet");
+const TransactionPool = require("../src/wallet/transaction-pool");
 const bc = new BlockChain();
+const wallet = new Wallet();
+const tp = new TransactionPool();
 
 app.use(bodyParser.json());
 
@@ -20,6 +24,17 @@ app.post("/mine", (req, res) => {
   console.log(`New block added: ${block.toString()}`);
 
   res.redirect("/blocks");
+});
+
+app.get("/tp", (req, res) => {
+  res.json(tp.transactions);
+});
+
+app.post("/tp", (req, res) => {
+  const { recipient, amount } = req.body;
+  wallet.createTransaction(recipient, amount, tp);
+
+  res.redirect("/tp");
 });
 
 const server = http.createServer(app);
