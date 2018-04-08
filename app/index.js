@@ -32,13 +32,14 @@ app.get("/tp", (req, res) => {
 
 app.post("/tp", (req, res) => {
   const { recipient, amount } = req.body;
-  wallet.createTransaction(recipient, amount, tp);
+  const transaction = wallet.createTransaction(recipient, amount, tp);
+  p2pServer.broadCastTransaction(transaction);
 
   res.redirect("/tp");
 });
 
 const server = http.createServer(app);
-const p2pServer = new P2Pserver(server, bc);
+const p2pServer = new P2Pserver(server, bc, tp);
 
 p2pServer.listen();
 server.listen(HTTP_PORT, () => {

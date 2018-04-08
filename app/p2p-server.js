@@ -1,11 +1,16 @@
 const WebSocket = require("ws");
 const PEERS = process.env.PEERS ? process.env.PEERS.split(",") : [];
+const MESSAGE_TYPES = {
+  chain: "CHAIN",
+  transaction: "TRANSACTION"
+};
 
 class P2Pserver {
-  constructor(server, bc) {
+  constructor(server, bc, transactionPool) {
     this.bc = bc;
     this.sockets = [];
     this.server = server;
+    this.transactionPool = transactionPool;
   }
 
   listen() {
@@ -41,17 +46,37 @@ class P2Pserver {
   }
 
   sendChain(socket) {
-    socket.send(JSON.stringify(this.bc.chain));
+    socket.send(
+      JSON.stringify({ type: MESSAGE_TYPES.chain, chain: this.bc.chain })
+    );
   }
 
   syncChain(chain) {
     this.sockets.forEach(socket => this.sendChain(socket));
   }
 
+  sendTransaction(socket, transaction) {
+    socket.send(
+      JSON.stringify({ type: MESSAGE_TYPES.transaction, transaction })
+    );
+  }
+
+  broadCastTransaction(transaction) {
+    this.sockets.forEach(socket => this.sendTransaction(socket, transaction));
+  }
+
   messageHandler(socket) {
     socket.on("message", message => {
-      const chain = JSON.parse(message);
-      this.bc.replaceChain(chain);
+      message = JSON.parse(message);
+
+      switch (message.type) {
+        case MESSAGE_TYPES.chain:
+          this.bc.replaceChain(message.chain);
+          break;
+        case MESSAGE_TYPES.transaction:
+          this.transactionPool.upsertTransaction(message.transaction);
+          break;
+      }
     });
   }
 }
