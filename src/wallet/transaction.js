@@ -17,7 +17,7 @@ class Transaction {
    * @param {Number} amount The amount to be transfered
    */
   static createTransaction(senderWallet, recipient, amount) {
-    const transaction = new this();
+    let transaction = new this();
 
     // Check if the sender has enough balance
     if (senderWallet.balance < amount) {
@@ -34,7 +34,7 @@ class Transaction {
       ]
     );
 
-    return transaction;
+    return this.signTransaction(transaction, senderWallet);
   }
 
   /**
@@ -88,7 +88,7 @@ class Transaction {
       address: recipient
     });
 
-    return this;
+    return Transaction.signTransaction(this, senderWallet);
   }
 }
 

@@ -3,6 +3,55 @@ const Transaction = require("../../src/wallet/transaction");
 const TransactionPool = require("../../src/wallet/transaction-pool");
 
 describe("Wallet", () => {
+  let senderWallet, recipientWallet, tp, amount;
+  beforeEach(() => {
+    tp = new TransactionPool();
+    senderWallet = new Wallet();
+    recipientWallet = new Wallet();
+    amount = 100;
+  });
+
+  it("should decrease the balance of the sender", () => {
+    const transaction = senderWallet.createTransaction(
+      recipientWallet.publicKey,
+      amount,
+      tp
+    );
+    expect(
+      transaction.outputs.find(
+        output => output.address === senderWallet.publicKey
+      ).amount
+    ).toBe(senderWallet.balance - amount);
+  });
+
+  it("should update the balance of the sender", () => {
+    let transaction = senderWallet.createTransaction(
+      recipientWallet.publicKey,
+      amount,
+      tp
+    );
+    transaction = senderWallet.createTransaction(
+      recipientWallet.publicKey,
+      amount,
+      tp
+    );
+    expect(
+      transaction.outputs.find(
+        output => output.address === senderWallet.publicKey
+      ).amount
+    ).toBe(senderWallet.balance - 2 * amount);
+  });
+
+  it("should not update transaction if the balance is insufficient", () => {
+    amount = 50000;
+    let transaction = senderWallet.createTransaction(
+      recipientWallet.publicKey,
+      amount,
+      tp
+    );
+    expect(transaction).toBeUndefined();
+  });
+
   describe("Transaction", () => {
     let senderWallet, recipientWallet;
 

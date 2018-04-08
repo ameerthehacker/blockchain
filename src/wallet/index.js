@@ -1,5 +1,6 @@
 const { INITIAL_BALANCE } = require("../../config");
 const Util = require("../util");
+const Transaction = require("./transaction");
 
 class Wallet {
   /**
@@ -26,6 +27,29 @@ class Wallet {
    */
   sign(hash) {
     return this.keyPair.sign(hash);
+  }
+
+  /**
+   * Create or update a transaction in a transaction pool
+   * @param {String} recipient Public Key of the recipient
+   * @param {Number} amount Amount to be transfered to the recipient
+   * @param {TransactionPool} tp Transaction Poll object to which transactions are to be added
+   */
+  createTransaction(recipient, amount, tp) {
+    if (this.balance < amount) {
+      console.log(`Amount: ${amount} exceeds the balance`);
+      return;
+    }
+
+    let transaction = tp.getTransaction(this.publicKey);
+    if (transaction) {
+      transaction.update(this, recipient, amount);
+    } else {
+      transaction = Transaction.createTransaction(this, recipient, amount);
+      tp.upsertTransaction(transaction);
+    }
+
+    return transaction;
   }
 }
 
