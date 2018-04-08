@@ -80,5 +80,51 @@ describe("Wallet", () => {
         Transaction.verifyTransaction(transaction, senderWallet)
       ).toBeFalsy();
     });
+
+    describe("updates the transaction correctly", () => {
+      let transaction, senderWallet, recipientWallet1, amount1, amount2;
+
+      beforeEach(() => {
+        amount1 = 50;
+        amount2 = 100;
+
+        senderWallet = new Wallet();
+        recipientWallet1 = new Wallet();
+        recipientWallet2 = new Wallet();
+        transaction = Transaction.createTransaction(
+          senderWallet,
+          recipientWallet1.publicKey,
+          amount1
+        );
+      });
+
+      it("should update the sender's output correctly", () => {
+        transaction.update(senderWallet, recipientWallet2.publicKey, amount2);
+
+        expect(
+          transaction.outputs.find(
+            output => output.address === senderWallet.publicKey
+          ).amount
+        ).toBe(senderWallet.balance - amount1 - amount2);
+      });
+
+      it("should add the recipient's output", () => {
+        transaction.update(senderWallet, recipientWallet2.publicKey, amount2);
+
+        expect(
+          transaction.outputs.find(
+            output => output.address === recipientWallet2.publicKey
+          ).amount
+        ).toBe(amount2);
+      });
+
+      it("should not update transaction for insufficient balance", () => {
+        amount2 = 50000;
+
+        expect(
+          transaction.update(senderWallet, recipientWallet2.publicKey, amount2)
+        ).toBeUndefined();
+      });
+    });
   });
 });

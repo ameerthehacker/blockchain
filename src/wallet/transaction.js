@@ -37,6 +37,11 @@ class Transaction {
     return transaction;
   }
 
+  /**
+   * Signs a transaction using the senders public key
+   * @param {Transaction} transaction The transaction that is to be signed
+   * @param {Wallet} senderWallet The wallet of the sender
+   */
   static signTransaction(transaction, senderWallet) {
     transaction.input = {
       timestamp: Date.now(),
@@ -48,12 +53,42 @@ class Transaction {
     return transaction;
   }
 
+  /**
+   * Verifies whether a transaction object is valid or not
+   * @param {Transaction} transaction The transaction that is to be verified
+   * @param {Wallet} senderWallet The wallet of the sender
+   */
   static verifyTransaction(transaction, senderWallet) {
     return Util.verifySignature(
       senderWallet.publicKey,
       transaction.input.signature,
       Util.hash(transaction.outputs)
     );
+  }
+
+  /**
+   * Update the current transactions by adding new outputs
+   * @param {Wallet} senderWallet The sender's wallet object
+   * @param {String} recipient Recipient's public key
+   * @param {Number} amount The amount to be transfered
+   */
+  update(senderWallet, recipient, amount) {
+    const senderOutput = this.outputs.find(
+      output => output.address === senderWallet.publicKey
+    );
+
+    if (senderOutput.amount < amount) {
+      console.log(`Amount: ${amount} exceeds the balance`);
+      return;
+    }
+
+    senderOutput.amount -= amount;
+    this.outputs.push({
+      amount,
+      address: recipient
+    });
+
+    return this;
   }
 }
 
