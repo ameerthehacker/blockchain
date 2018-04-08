@@ -1,6 +1,7 @@
 const Wallet = require("../../src/wallet");
 const Transaction = require("../../src/wallet/transaction");
 const TransactionPool = require("../../src/wallet/transaction-pool");
+const { MINING_REWARD } = require("../../config");
 
 describe("Wallet", () => {
   let senderWallet, recipientWallet, tp, amount;
@@ -232,6 +233,19 @@ describe("Wallet", () => {
       expect(JSON.stringify(tp.validTransactions())).toBe(
         JSON.stringify(validTransactions)
       );
+    });
+
+    it("should reward the miner", () => {
+      const transaction = Transaction.createRewardTransaction(
+        Wallet.blockChainWallet(),
+        recipientWallet.publicKey
+      );
+
+      expect(
+        transaction.outputs.find(
+          output => output.address === recipientWallet.publicKey
+        ).amount
+      ).toBe(MINING_REWARD);
     });
   });
 });

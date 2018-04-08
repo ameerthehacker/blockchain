@@ -1,4 +1,5 @@
 const Util = require("../util");
+const { MINING_REWARD } = require("../../config");
 
 class Transaction {
   /**
@@ -11,30 +12,50 @@ class Transaction {
   }
 
   /**
+   *
+   * @param {Wallet} senderWallet Wallet object of the sender
+   * @param {Array} outputs Array of outputs for the transaction
+   */
+  static createTransactionWithOutputs(senderWallet, outputs) {
+    let transaction = new this();
+    transaction.outputs.push(...outputs);
+    return this.signTransaction(transaction, senderWallet);
+  }
+
+  /**
    * Creates a new transaction object
    * @param {Wallet} senderWallet Wallet object of the sender
    * @param {String} recipient Public key of the recipient
    * @param {Number} amount The amount to be transfered
    */
   static createTransaction(senderWallet, recipient, amount) {
-    let transaction = new this();
-
     // Check if the sender has enough balance
     if (senderWallet.balance < amount) {
       console.log(`Amount: ${amount} exceeds the balance`);
       return;
     }
-    transaction.outputs.push(
-      ...[
-        {
-          amount: senderWallet.balance - amount,
-          address: senderWallet.publicKey
-        },
-        { amount, address: recipient }
-      ]
-    );
 
-    return this.signTransaction(transaction, senderWallet);
+    return this.createTransactionWithOutputs(senderWallet, [
+      {
+        amount: senderWallet.balance - amount,
+        address: senderWallet.publicKey
+      },
+      { amount, address: recipient }
+    ]);
+  }
+
+  /**
+   * Rewards a miner with a predefined amount of cryptocurrency
+   * @param {Wallet} blockChainWallet Wallet object of the blockchain itself
+   * @param {String} miner Public key of the miner
+   */
+  static createRewardTransaction(blockChainWallet, miner) {
+    return this.createTransactionWithOutputs(blockChainWallet, [
+      {
+        amount: MINING_REWARD,
+        address: miner
+      }
+    ]);
   }
 
   /**

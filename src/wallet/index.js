@@ -51,6 +51,13 @@ class Wallet {
 
     return transaction;
   }
+
+  /**
+   * Creates a wallet object for the blockchain
+   */
+  static blockChainWallet() {
+    return new this();
+  }
 }
 
 module.exports = Wallet;
