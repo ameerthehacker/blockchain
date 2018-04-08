@@ -7,11 +7,16 @@ const BlockChain = require("../src/block-chain");
 const P2Pserver = require("./p2p-server");
 const Wallet = require("../src/wallet");
 const TransactionPool = require("../src/wallet/transaction-pool");
+const Miner = require("./miner");
 const bc = new BlockChain();
 const wallet = new Wallet();
 const tp = new TransactionPool();
 
 app.use(bodyParser.json());
+
+const server = http.createServer(app);
+const p2pServer = new P2Pserver(server, bc, tp);
+const miner = new Miner(bc, wallet, p2pServer, tp);
 
 app.get("/blocks", (req, res) => {
   res.json(bc.chain);
@@ -22,6 +27,15 @@ app.post("/mine", (req, res) => {
   // Sync the chain with the peers
   p2pServer.syncChain(bc.chain);
   console.log(`New block added: ${block.toString()}`);
+
+  res.redirect("/blocks");
+});
+
+app.get("/mine-transactions", (req, res) => {
+  const block = miner.mine();
+  if (block) {
+    console.log(`New block added: ${block.toString()}`);
+  }
 
   res.redirect("/blocks");
 });
@@ -41,9 +55,6 @@ app.post("/tp", (req, res) => {
 app.get("/public-key", (req, res) => {
   res.json({ publicKey: wallet.publicKey });
 });
-
-const server = http.createServer(app);
-const p2pServer = new P2Pserver(server, bc, tp);
 
 p2pServer.listen();
 server.listen(HTTP_PORT, () => {

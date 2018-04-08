@@ -11,20 +11,26 @@ class Miner {
 
   mine() {
     // Get the valid transactions
-    const validTransactions = tp.validTransactions();
+    const validTransactions = this.tp.validTransactions();
     // Add the reward transaction
-    validTransactions.push(
-      Transaction.createRewardTransaction(
-        Wallet.blockChainWallet(),
-        this.wallet
-      )
-    );
-    // Add the transactions to the blockchain
-    this.blockchain.addBlock(validTransactions);
-    // Sync the blockchain
-    this.p2pServer.syncChain();
-    // Clear all the transactions
-    tp.clear();
-    this.p2pServer.broadCastClearTransaction();
+    if (validTransactions.length > 0) {
+      validTransactions.push(
+        Transaction.createRewardTransaction(
+          Wallet.blockChainWallet(),
+          this.wallet
+        )
+      );
+      // Add the transactions to the blockchain
+      const block = this.blockchain.addBlock(validTransactions);
+      // Sync the blockchain
+      this.p2pServer.syncChain();
+      // Clear all the transactions
+      this.tp.clear();
+      this.p2pServer.broadCastClearTransaction();
+
+      return block;
+    }
   }
 }
+
+module.exports = Miner;
