@@ -38,6 +38,10 @@ app.post("/tp", (req, res) => {
   res.redirect("/tp");
 });
 
+app.get("/public-key", (req, res) => {
+  res.json({ publicKey: wallet.publicKey });
+});
+
 const server = http.createServer(app);
 const p2pServer = new P2Pserver(server, bc, tp);
 
