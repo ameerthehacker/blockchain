@@ -209,5 +209,29 @@ describe("Wallet", () => {
 
       expect(JSON.stringify(newTransaction)).not.toBe(oldTransaction);
     });
+
+    it("should grab only `valid` transactions", () => {
+      let validTransactions = [];
+
+      for (let i = 0; i < 6; i++) {
+        let senderWallet = new Wallet();
+        let recipientWallet = new Wallet();
+        const transaction = senderWallet.createTransaction(
+          recipientWallet.publicKey,
+          amount,
+          tp
+        );
+        if (i % 2 == 0) {
+          // corrupt the transaction
+          transaction.input.amount += 100;
+        } else {
+          validTransactions.push(transaction);
+        }
+      }
+
+      expect(JSON.stringify(tp.validTransactions())).toBe(
+        JSON.stringify(validTransactions)
+      );
+    });
   });
 });

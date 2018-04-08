@@ -58,9 +58,9 @@ class Transaction {
    * @param {Transaction} transaction The transaction that is to be verified
    * @param {Wallet} senderWallet The wallet of the sender
    */
-  static verifyTransaction(transaction, senderWallet) {
+  static verifyTransaction(transaction) {
     return Util.verifySignature(
-      senderWallet.publicKey,
+      transaction.input.address,
       transaction.input.signature,
       Util.hash(transaction.outputs)
     );
