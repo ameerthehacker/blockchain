@@ -78,9 +78,7 @@ class Block {
    * @param {Object} data Actual data to be stored in the block
    */
   static hash(timestamp, lastHash, nonce, data, difficulty) {
-    return Util.hash(
-      `${timestamp}${lastHash}${nonce}${data}${difficulty}`
-    ).toString();
+    return Util.hash(`${timestamp}${lastHash}${nonce}${data}${difficulty}`);
   }
 
   /**

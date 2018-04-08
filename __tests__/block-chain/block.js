@@ -1,6 +1,5 @@
 const Block = require("../../src/block-chain/block");
 const { DIFFICULTY } = require("../../config");
-const SHA256 = require("crypto-js/sha256");
 
 describe("Block", () => {
   let lastBlock, data, block;
@@ -20,11 +19,8 @@ describe("Block", () => {
   });
 
   it("should calculate the `hash` correctly", () => {
-    const { timestamp, lastHash, nonce, data, difficulty } = block;
-    const hash = SHA256(
-      `${timestamp}${lastHash}${nonce}${data}${difficulty}`
-    ).toString();
-
+    const hash = Block.hashBlock(block);
+    
     expect(block.hash).toBe(hash);
   });
 
