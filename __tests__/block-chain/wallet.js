@@ -247,5 +247,11 @@ describe("Wallet", () => {
         ).amount
       ).toBe(MINING_REWARD);
     });
+
+    it("should clear the transaction pool", () => {
+      tp.clear();
+
+      expect(tp.transactions.length).toBe(0);
+    });
   });
 });

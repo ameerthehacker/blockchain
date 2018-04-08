@@ -28,6 +28,10 @@ class TransactionPool {
     return this;
   }
 
+  /**
+   * Gets a transaction with given public key
+   * @param {String} address Public key of the sender
+   */
   getTransaction(address) {
     return this.transactions.find(t => t.input.address === address);
   }
@@ -55,6 +59,13 @@ class TransactionPool {
     });
 
     return validTransactions;
+  }
+
+  /**
+   * Clears all the transactions in the transaction pool
+   */
+  clear() {
+    this.transactions = [];
   }
 }
 
