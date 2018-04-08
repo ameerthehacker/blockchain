@@ -35,7 +35,12 @@ class Wallet {
    * @param {Number} amount Amount to be transfered to the recipient
    * @param {TransactionPool} tp Transaction Poll object to which transactions are to be added
    */
-  createTransaction(recipient, amount, tp) {
+  createTransaction(recipient, amount, tp, blockchain) {
+    let balance = this.calculateBalance(blockchain);
+    if (balance != 0) {
+      this.balance = balance;
+    }
+
     if (this.balance < amount) {
       console.log(`Amount: ${amount} exceeds the balance`);
       return;
@@ -57,6 +62,46 @@ class Wallet {
    */
   static blockChainWallet() {
     return new this();
+  }
+
+  /**
+   * Calculates a user's balance from the blockchain
+   * @param {BlockChain} blockchain The BlockChain object
+   */
+  calculateBalance(blockchain) {
+    let balance = 0;
+    let transactions = [];
+
+    blockchain.chain.forEach(block =>
+      block.data.forEach(transaction => transactions.push(transaction))
+    );
+
+    let walletInputTransactions = transactions.filter(transaction => {
+      if (transaction.input.address == this.publicKey);
+    });
+
+    let startTime = 0;
+    if (walletInputTransactions.length > 0) {
+      let recentTransaction = walletInputTransactions.reduce((prev, cur) => {
+        return prev.input.timestamp > cur.input.timestamp ? prev : cur;
+      });
+
+      balance += recentTransaction.input.amount;
+      startTime = recentTransaction.input.timestamp;
+    }
+
+    transactions.forEach(transaction => {
+      if (transaction.input.timestamp > startTime) {
+        let output = transaction.outputs.find(
+          output => output.address === this.publicKey
+        );
+        if (output) {
+          balance += output.amount;
+        }
+      }
+    });
+
+    return balance;
   }
 }
 

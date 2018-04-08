@@ -2,21 +2,24 @@ const Wallet = require("../../src/wallet");
 const Transaction = require("../../src/wallet/transaction");
 const TransactionPool = require("../../src/wallet/transaction-pool");
 const { MINING_REWARD } = require("../../config");
+const BlockChain = require("../../src/block-chain");
 
 describe("Wallet", () => {
-  let senderWallet, recipientWallet, tp, amount;
+  let senderWallet, recipientWallet, tp, amount, bc;
   beforeEach(() => {
     tp = new TransactionPool();
     senderWallet = new Wallet();
     recipientWallet = new Wallet();
     amount = 100;
+    bc = new BlockChain();
   });
 
   it("should decrease the balance of the sender", () => {
     const transaction = senderWallet.createTransaction(
       recipientWallet.publicKey,
       amount,
-      tp
+      tp,
+      bc
     );
     expect(
       transaction.outputs.find(
@@ -29,12 +32,14 @@ describe("Wallet", () => {
     let transaction = senderWallet.createTransaction(
       recipientWallet.publicKey,
       amount,
-      tp
+      tp,
+      bc
     );
     transaction = senderWallet.createTransaction(
       recipientWallet.publicKey,
       amount,
-      tp
+      tp,
+      bc
     );
     expect(
       transaction.outputs.find(
@@ -48,7 +53,8 @@ describe("Wallet", () => {
     let transaction = senderWallet.createTransaction(
       recipientWallet.publicKey,
       amount,
-      tp
+      tp,
+      bc
     );
     expect(transaction).toBeUndefined();
   });
@@ -180,7 +186,7 @@ describe("Wallet", () => {
   });
 
   describe("Transaction Pool", () => {
-    let tp, senderWallet, recipientWallet1, recipientWallet2, transaction;
+    let tp, senderWallet, recipientWallet1, recipientWallet2, transaction, bc;
     const amount = 100;
 
     beforeEach(() => {
@@ -193,6 +199,7 @@ describe("Wallet", () => {
         recipientWallet1.publicKey,
         amount
       );
+      bc = new BlockChain();
     });
 
     it("should add the new transaction to the transaction pool", () => {
@@ -220,7 +227,8 @@ describe("Wallet", () => {
         const transaction = senderWallet.createTransaction(
           recipientWallet.publicKey,
           amount,
-          tp
+          tp,
+          bc
         );
         if (i % 2 == 0) {
           // corrupt the transaction
