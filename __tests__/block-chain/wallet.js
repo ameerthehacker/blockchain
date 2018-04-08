@@ -1,5 +1,6 @@
 const Wallet = require("../../src/wallet");
 const Transaction = require("../../src/wallet/transaction");
+const TransactionPool = require("../../src/wallet/transaction-pool");
 
 describe("Wallet", () => {
   describe("Transaction", () => {
@@ -125,6 +126,39 @@ describe("Wallet", () => {
           transaction.update(senderWallet, recipientWallet2.publicKey, amount2)
         ).toBeUndefined();
       });
+    });
+  });
+
+  describe("Transaction Pool", () => {
+    let tp, senderWallet, recipientWallet1, recipientWallet2, transaction;
+    const amount = 100;
+
+    beforeEach(() => {
+      tp = new TransactionPool();
+      senderWallet = new Wallet();
+      recipientWallet1 = new Wallet();
+      recipientWallet2 = new Wallet();
+      transaction = Transaction.createTransaction(
+        senderWallet,
+        recipientWallet1.publicKey,
+        amount
+      );
+    });
+
+    it("should add the new transaction to the transaction pool", () => {
+      tp.upsertTransaction(transaction);
+
+      expect(tp.transactions.find(t => t.id === transaction.id)).toBeTruthy();
+    });
+
+    it("should update the old transaction in transaction pool", () => {
+      const oldTransaction = JSON.stringify(transaction);
+      tp.upsertTransaction(transaction);
+      transaction.update(senderWallet, recipientWallet2.address, amount);
+      tp.upsertTransaction(transaction);
+      const newTransaction = tp.transactions.find(t => t.id === transaction.id);
+
+      expect(JSON.stringify(newTransaction)).not.toBe(oldTransaction);
     });
   });
 });
